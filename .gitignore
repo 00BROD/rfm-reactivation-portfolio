@@ -1,8 +1,9 @@
-data/*.db
-data/*.xlsx
-data/*.xls
-data/*.zip
+# raw + heavy derived data (regenerate via build_db.py -> analyze.py)
+data/
+output/extracts/fact_sales.csv
 output/extracts/tableau_flat.csv
+site/
 __pycache__/
 *.pyc
 .DS_Store
+.vercel
