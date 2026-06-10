@@ -1,0 +1,51 @@
+{
+  "revenue": 8911408,
+  "orders": 18532,
+  "customers": 4338,
+  "aov": 480.87,
+  "date_min": "2010-12-01",
+  "date_max": "2011-12-09",
+  "top10_pct_rev": 61,
+  "top20_pct_rev": 75,
+  "react_customers": 807,
+  "react_historical_rev": 1322135,
+  "react_avg_dormant_days": 135,
+  "champions_rev": 6506542,
+  "segments": [
+    {
+      "segment": "At Risk (was valuable)",
+      "customers": 646,
+      "revenue": 1040932.7,
+      "avg_recency": 119.2,
+      "avg_orders": 4.2
+    },
+    {
+      "segment": "Champions",
+      "customers": 1319,
+      "revenue": 6506542.0,
+      "avg_recency": 17.1,
+      "avg_orders": 9.4
+    },
+    {
+      "segment": "Lapsed / Low",
+      "customers": 1504,
+      "revenue": 767146.8,
+      "avg_recency": 186.6,
+      "avg_orders": 1.3
+    },
+    {
+      "segment": "Loyal",
+      "customers": 610,
+      "revenue": 504670.8,
+      "avg_recency": 23.4,
+      "avg_orders": 2.2
+    },
+    {
+      "segment": "Recent / New",
+      "customers": 259,
+      "revenue": 92115.6,
+      "avg_recency": 27.1,
+      "avg_orders": 1.0
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+data/*.db
+data/*.xlsx
+data/*.xls
+data/*.zip
+__pycache__/
+*.pyc
+.DS_Store
