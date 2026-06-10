@@ -15,8 +15,9 @@ CHT = pathlib.Path("output/charts");   CHT.mkdir(exist_ok=True)
 con = sqlite3.connect("data/retail.db")
 
 INK="#1b2a4a"; ACC="#e2574c"; GOLD="#d9a441"; MUT="#8a93a6"
-plt.rcParams.update({"font.size":11,"axes.edgecolor":MUT,"axes.grid":True,
-    "grid.color":"#eceef2","grid.linewidth":.8,"axes.spines.top":False,"axes.spines.right":False})
+plt.rcParams.update({"font.size":13,"axes.edgecolor":MUT,"axes.grid":True,
+    "grid.color":"#eceef2","grid.linewidth":.8,"axes.spines.top":False,"axes.spines.right":False,
+    "font.family":"DejaVu Sans","axes.titlepad":12,"figure.dpi":100,"savefig.bbox":"tight"})
 
 # ---- pull base frames -------------------------------------------------------
 sales = pd.read_sql("SELECT * FROM sales", con, parse_dates=["InvoiceDate"])
@@ -79,27 +80,27 @@ sales[["InvoiceNo","InvoiceDate","InvoiceMonth","CustomerID","Country",
 
 # ---- charts -----------------------------------------------------------------
 # 1 monthly revenue
-fig,ax=plt.subplots(figsize=(9,4))
+fig,ax=plt.subplots(figsize=(9.5,4.4))
 m=monthly.copy(); m["revenue"]/=1e3
 ax.plot(m.InvoiceMonth, m.revenue, marker="o", color=INK, lw=2)
 ax.fill_between(range(len(m)), m.revenue, color=INK, alpha=.06)
 ax.set_title("Monthly Revenue (£000s)", color=INK, fontweight="bold", loc="left")
 ax.set_xticks(range(len(m))); ax.set_xticklabels(m.InvoiceMonth, rotation=45, ha="right")
-plt.tight_layout(); plt.savefig(CHT/"monthly_revenue.png", dpi=140); plt.close()
+plt.tight_layout(); plt.savefig(CHT/"monthly_revenue.png", dpi=200); plt.close()
 
 # 2 segment revenue
 s=seg.sort_values("revenue")
-fig,ax=plt.subplots(figsize=(9,4))
+fig,ax=plt.subplots(figsize=(9.5,4.4))
 cols=[ACC if x=="At Risk (was valuable)" else (GOLD if x=="Champions" else MUT) for x in s.segment]
 ax.barh(s.segment, s.revenue/1e6, color=cols)
 ax.set_title("Revenue by RFM Segment (£M)", color=INK, fontweight="bold", loc="left")
 for i,(v,c) in enumerate(zip(s.revenue/1e6,s.customers)):
-    ax.text(v+.05,i,f"£{v:.1f}M · {int(c)} cust", va="center", fontsize=9, color=INK)
+    ax.text(v+.05,i,f"£{v:.1f}M · {int(c)} cust", va="center", fontsize=11, color=INK)
 ax.set_xlim(0, s.revenue.max()/1e6*1.25)
-plt.tight_layout(); plt.savefig(CHT/"segment_revenue.png", dpi=140); plt.close()
+plt.tight_layout(); plt.savefig(CHT/"segment_revenue.png", dpi=200); plt.close()
 
 # 3 RFM scatter (recency vs monetary, dormant-value highlighted)
-fig,ax=plt.subplots(figsize=(9,4.6))
+fig,ax=plt.subplots(figsize=(10,5))
 base=rfm[rfm.segment!="At Risk (was valuable)"]
 ax.scatter(base.recency, base.monetary, s=14, color=MUT, alpha=.35, label="Other")
 ax.scatter(react.recency, react.monetary, s=20, color=ACC, alpha=.8, label="Reactivation target")
@@ -108,14 +109,14 @@ ax.set_ylabel("Lifetime revenue (£, log)")
 ax.set_title("Dormant ≠ Worthless: high-value customers gone quiet",
              color=INK, fontweight="bold", loc="left")
 ax.legend(frameon=False)
-plt.tight_layout(); plt.savefig(CHT/"rfm_scatter.png", dpi=140); plt.close()
+plt.tight_layout(); plt.savefig(CHT/"rfm_scatter.png", dpi=200); plt.close()
 
 # 4 country mix
 c=country.head(6).iloc[::-1]
-fig,ax=plt.subplots(figsize=(9,4))
+fig,ax=plt.subplots(figsize=(9.5,4.4))
 ax.barh(c.Country, c.revenue/1e6, color=INK)
 ax.set_title("Top Markets by Revenue (£M)", color=INK, fontweight="bold", loc="left")
-plt.tight_layout(); plt.savefig(CHT/"country_revenue.png", dpi=140); plt.close()
+plt.tight_layout(); plt.savefig(CHT/"country_revenue.png", dpi=200); plt.close()
 
 # ---- metrics.json (feeds dashboard + exec summary) --------------------------
 tot=float(sales.Revenue.sum())
