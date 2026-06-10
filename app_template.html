@@ -65,6 +65,8 @@ th:hover{color:var(--ink)}th.s::after{content:" \25BE";color:var(--acc)}th.s.asc
 tbody tr{transition:background .15s cubic-bezier(.16,1,.3,1)}
 tbody tr:hover{background:#f8fafc}
 .note{color:var(--mut);font-size:12px;margin:14px 0 0;line-height:1.6}
+.filterchip{display:inline-block;background:#fdecea;color:var(--acc);padding:1px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;margin-left:8px;cursor:pointer}
+.filterchip::after{content:" ✕";opacity:.6}
 .method li{margin:6px 0}
 footer{color:var(--mut);font-size:12px;margin-top:36px;padding-top:18px;border-top:1px solid var(--line);text-align:center}
 @media(prefers-reduced-motion:no-preference){
@@ -110,7 +112,15 @@ footer{color:var(--mut);font-size:12px;margin-top:36px;padding-top:18px;border-t
  <div class=card><h2>Monthly revenue</h2><div id=cMonthly class=chart></div></div>
  <div class=card><h2>Revenue by segment</h2><div id=cSeg class=chart></div></div>
 </div>
-<div class=card><h2>Dormant does not mean worthless — recency vs lifetime value</h2><div id=cScatter class=chart style=height:400px></div></div>
+<div class=card><h2>Dormant does not mean worthless — recency vs lifetime value <span class=filterchip id=chip hidden></span></h2><div id=cScatter class=chart style=height:400px></div>
+<p class=note>Tip: click a bar in “Revenue by segment” to filter this scatter and the call list to that segment. Click again to clear.</p></div>
+
+<div class=grid2>
+ <div class=card><h2>Revenue concentration — the Pareto curve</h2><div id=cPareto class=chart></div>
+  <p class=note>The top 10% of customers generate 61% of revenue; the top 20% generate 75%. Retention beats acquisition.</p></div>
+ <div class=card><h2>Cohort retention — % active in months after first purchase</h2><div id=cCohort class=chart></div>
+  <p class=note>Each row is a monthly acquisition cohort. The Dec-2010 cohort keeps returning at 32–50% for a full year — the loyal core RFM later identifies as Champions.</p></div>
+</div>
 
 <div class=card>
  <h2>Reactivation ROI — what is the win-back worth?</h2>
@@ -221,8 +231,17 @@ mk("cSeg",{grid:{left:140,right:60,top:10,bottom:30},tooltip:Object.assign({},TI
    borderRadius:[0,4,4,0]}})).reverse(),
   label:{show:true,position:"right",color:"#16223d",fontSize:11,formatter:o=>gbp(o.value)}}]});
 
-const split=k=>D.pts.filter(p=>p[2]===k).map(p=>[p[0],p[1]]);
-mk("cScatter",{grid:{left:64,right:20,top:16,bottom:48},
+// ---- cross-filter state ----
+let segFilter=null; // segment name or null
+const chip=document.getElementById("chip");
+function setFilter(name){
+ segFilter=(segFilter===name)?null:name;
+ chip.hidden=!segFilter; chip.textContent=segFilter||"";
+ drawScatter(); render();
+}
+chip.onclick=()=>setFilter(segFilter);
+
+const scatterOpt=pts=>({grid:{left:64,right:20,top:16,bottom:48},
  tooltip:Object.assign({},TIP,{trigger:"item",formatter:o=>`Dormant ${o.value[0]} days<br>Lifetime ${gbp(o.value[1])}`}),
  legend:{data:["Reactivation target","Other customers"],bottom:0,textStyle:{color:"#7c869c",fontSize:12},icon:"circle"},
  xAxis:Object.assign({type:"value",name:"Days since last purchase",nameLocation:"middle",nameGap:30,
@@ -230,9 +249,46 @@ mk("cScatter",{grid:{left:64,right:20,top:16,bottom:48},
  yAxis:Object.assign({type:"log",name:"Lifetime revenue (£)",nameLocation:"middle",nameGap:46,
   nameTextStyle:{color:"#7c869c",fontSize:12},axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v>=1000?(v/1000)+"k":v)}},AX),
  series:[
-  {name:"Other customers",type:"scatter",data:split(0),symbolSize:5,itemStyle:{color:"#aab2c2",opacity:.35}},
-  {name:"Reactivation target",type:"scatter",data:split(1),symbolSize:6,itemStyle:{color:"#e2574c",opacity:.78}}
+  {name:"Other customers",type:"scatter",data:pts.filter(p=>p[2]===0).map(p=>[p[0],p[1]]),symbolSize:5,itemStyle:{color:"#aab2c2",opacity:.35}},
+  {name:"Reactivation target",type:"scatter",data:pts.filter(p=>p[2]===1).map(p=>[p[0],p[1]]),symbolSize:6,itemStyle:{color:"#e2574c",opacity:.78}}
  ]});
+const cScatter=echarts.init(document.getElementById("cScatter"));charts.push(cScatter);
+function drawScatter(){
+ const si=segFilter?D.seg_names.indexOf(segFilter):-1;
+ cScatter.setOption(scatterOpt(si<0?D.pts:D.pts.filter(p=>p[3]===si)),true);
+}
+drawScatter();
+
+// seg bar click → cross-filter
+const cSeg=charts[1];
+cSeg.on("click",p=>setFilter(p.name));
+
+// ---- Pareto curve ----
+mk("cPareto",{grid:{left:54,right:18,top:18,bottom:44},
+ tooltip:Object.assign({},TIP,{trigger:"axis",formatter:o=>`Top ${o[0].value[0]}% of customers<br><b>${o[0].value[1]}%</b> of revenue`}),
+ xAxis:Object.assign({type:"value",max:100,name:"% of customers (ranked by spend)",nameLocation:"middle",nameGap:28,
+  nameTextStyle:{color:"#7c869c",fontSize:11},axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>v+"%"}},AX),
+ yAxis:Object.assign({type:"value",max:100,axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>v+"%"}},AX),
+ series:[{type:"line",data:D.pareto,showSymbol:false,lineStyle:{color:"#16223d",width:2.5},
+  areaStyle:{color:"rgba(22,34,61,.08)"},
+  markLine:{symbol:"none",label:{color:"#e2574c",fontSize:11,formatter:"top 20% → 75%"},
+   lineStyle:{color:"#e2574c",type:"dashed"},data:[{xAxis:20}]}}]});
+
+// ---- Cohort retention heatmap ----
+const cohortNames=Object.keys(D.cohorts);
+const heat=[];
+cohortNames.forEach((c,y)=>D.cohorts[c].ret.forEach((v,x)=>{if(v!=null)heat.push([x,y,v]);}));
+mk("cCohort",{grid:{left:74,right:14,top:8,bottom:64},
+ tooltip:Object.assign({},TIP,{trigger:"item",
+  formatter:o=>`${cohortNames[o.value[1]]} cohort (${D.cohorts[cohortNames[o.value[1]]].n} customers)<br>Month ${o.value[0]}: <b>${o.value[2]}%</b> active`}),
+ xAxis:Object.assign({type:"category",data:[...Array(13).keys()],name:"Months since first purchase",
+  nameLocation:"middle",nameGap:26,nameTextStyle:{color:"#7c869c",fontSize:11}},AX),
+ yAxis:Object.assign({type:"category",data:cohortNames,axisLabel:{color:"#7c869c",fontSize:10}},AX),
+ visualMap:{min:0,max:50,calculable:false,orient:"horizontal",left:"center",bottom:0,itemWidth:10,itemHeight:90,
+  textStyle:{color:"#7c869c",fontSize:10},inRange:{color:["#f4f6f9","#f9c8c2","#e2574c","#16223d"]}},
+ series:[{type:"heatmap",data:heat,label:{show:true,fontSize:8.5,color:"#33405c",
+  formatter:o=>o.value[0]===0?"":Math.round(o.value[2])},
+  itemStyle:{borderColor:"#fff",borderWidth:1.5,borderRadius:2}}]});
 
 // ---- ROI ----
 const sN=document.getElementById("sN"),sC=document.getElementById("sC");
@@ -254,10 +310,10 @@ const fmt=[v=>`<td class=t>${v}</td>`,v=>`<td>${v}</td>`,v=>`<td>${v}</td>`,v=>`
  v=>`<td>${gbp(v)}</td>`,v=>`<td>${gbp(v)}</td>`,v=>`<td><b>${v}</b></td>`];
 function render(){
  const term=q.value.trim().toLowerCase();
- let r=D.rows.filter(x=>!term||(""+x[0]).includes(term)||x[1].toLowerCase().includes(term));
+ let r=D.rows.filter(x=>(!segFilter||x[7]===segFilter)&&(!term||(""+x[0]).includes(term)||x[1].toLowerCase().includes(term)));
  r.sort((a,b)=>{const d=typeof a[sortC]==="number"?a[sortC]-b[sortC]:(""+a[sortC]).localeCompare(b[sortC]);return asc?d:-d;});
- count.textContent=`${r.length.toLocaleString()} of ${D.n_targets}`;
- tb.innerHTML=r.slice(0,60).map(x=>"<tr>"+x.map((v,i)=>fmt[i](v)).join("")+"</tr>").join("");
+ count.textContent=`${r.length.toLocaleString()} of ${D.n_targets}`+(segFilter?` · ${segFilter}`:"");
+ tb.innerHTML=r.slice(0,60).map(x=>"<tr>"+x.slice(0,7).map((v,i)=>fmt[i](v)).join("")+"</tr>").join("");
 }
 q.oninput=render;
 document.querySelectorAll("th[data-c]").forEach(th=>th.onclick=()=>{

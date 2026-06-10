@@ -7,6 +7,12 @@ import json, csv, pathlib
 OUT = pathlib.Path("output")
 m = json.load(open(OUT / "metrics.json"))
 
+# segment per customer (join key for real click-to-filter)
+seg_by_id = {}
+with open(OUT / "extracts/rfm_customers.csv") as f:
+    for r in csv.DictReader(f):
+        seg_by_id[r["CustomerID"]] = r["segment"]
+
 # reactivation targets -> compact JSON (sorted by priority desc already from analyze.py)
 rows = []
 with open(OUT / "reactivation_targets.csv") as f:
@@ -14,6 +20,7 @@ with open(OUT / "reactivation_targets.csv") as f:
         rows.append({
             "id": r["CustomerID"],
             "co": r["country"],
+            "seg": seg_by_id.get(r["CustomerID"], "?"),
             "rec": int(float(r["recency"])),
             "freq": int(float(r["frequency"])),
             "mon": round(float(r["monetary"])),
@@ -42,7 +49,11 @@ html = """<!doctype html>
 <meta property=og:description content="£1.32M of dormant revenue, surfaced as a priority-scored call list. Interactive analyst dashboard on 541K real transactions.">
 <meta property=og:type content=website>
 <meta property=og:url content="https://retail-reactivation.vercel.app">
-<meta name=twitter:card content=summary>
+<meta property=og:image content="https://retail-reactivation.vercel.app/og.png">
+<meta property=og:image:width content=1200>
+<meta property=og:image:height content=630>
+<meta name=twitter:image content="https://retail-reactivation.vercel.app/og.png">
+<meta name=twitter:card content=summary_large_image>
 <link rel=icon href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230b1020'/><text y='72' x='50' font-size='62' text-anchor='middle' fill='%234ade80' font-family='Arial' font-weight='bold'>£</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
@@ -137,10 +148,11 @@ tr:hover td{background:#0e1730}
     <h3>Priority reactivation call list</h3><div class=hint>The deliverable — sortable, searchable. Score = 0.5·spend + 0.3·frequency + 0.2·recency.</div>
     <div class=tbar>
       <input id=q placeholder="Search by customer ID or country…">
+      <span class=pill id=segFilter style="display:none;cursor:pointer;background:#fbbf2422;color:#fbbf24"></span>
       <span class=cnt id=tcnt></span>
     </div>
     <div class=tw><table id=tbl><thead><tr>
-      <th data-k=score class=num>Priority ▾</th><th data-k=id>Customer</th><th data-k=co>Country</th>
+      <th data-k=score class=num>Priority ▾</th><th data-k=id>Customer</th><th data-k=seg>Segment</th><th data-k=co>Country</th>
       <th data-k=rec class=num>Days quiet</th><th data-k=freq class=num>Orders</th>
       <th data-k=mon class=num>Lifetime £</th><th data-k=val class=num>Reactiv. value £</th><th data-k=last>Last order</th>
     </tr></thead><tbody id=tbody></tbody></table></div>
@@ -181,7 +193,8 @@ segC.setOption({backgroundColor:'',grid:{left:8,right:24,top:16,bottom:8,contain
 xAxis:{type:'value',...axis,axisLabel:{...axis.axisLabel,formatter:v=>fk(v)}},
 yAxis:{type:'category',data:segData.map(s=>s.segment),...axis},
 series:[{type:'bar',data:segData.map(s=>({value:s.revenue,itemStyle:{color:segColor[s.segment]||'#60a5fa',borderRadius:[0,5,5,0]}})),barWidth:'58%'}]});
-segC.on('click',p=>{document.getElementById('q').value=p.name==='At Risk (was valuable)'?'':document.getElementById('q').value;flash(p.name)});
+segC.on('click',p=>{setSegFilter(segFilterVal===p.name?null:p.name);
+document.getElementById('tbl').scrollIntoView({behavior:'smooth',block:'center'})});
 
 // monthly line
 const monC=echarts.init(document.getElementById('monChart'),'dark');
@@ -217,18 +230,27 @@ document.getElementById('roiVal').textContent=f0(out);
 document.getElementById('roiBasis').textContent=`Top ${n} customers = ${f0(base)} lifetime spend. At ${pr}% reactivation → ${f0(out)} recovered.`;}
 dial.oninput=rate.oninput=roi;roi();
 
-// call list table
-let sortK='score',sortDir=-1,query='';
-const tbody=document.getElementById('tbody'),tcnt=document.getElementById('tcnt');
+// call list table — search + segment filter (driven by chart clicks) + sort
+let sortK='score',sortDir=-1,query='',segFilterVal=null;
+const tbody=document.getElementById('tbody'),tcnt=document.getElementById('tcnt'),segFEl=document.getElementById('segFilter');
+const inList=new Set(R.map(x=>x.seg));
 function pill(sc){const c=sc>=70?'#4ade80':sc>=40?'#fbbf24':'#64748b';return `<span class=pill style="background:${c}22;color:${c}">${sc}</span>`}
-function render(){let r=R.filter(x=>!query||x.id.includes(query)||x.co.toLowerCase().includes(query));
+function segPill(s){const c=segColor[s]||'#64748b';return `<span class=pill style="background:${c}22;color:${c}">${s.replace(' (was valuable)','')}</span>`}
+function setSegFilter(s){segFilterVal=s;
+if(s){segFEl.style.display='inline-block';segFEl.textContent=(inList.has(s)?'✕ ':'')+s;
+const c=segColor[s]||'#64748b';segFEl.style.background=c+'22';segFEl.style.color=c;}
+else segFEl.style.display='none';
+render();}
+segFEl.onclick=()=>setSegFilter(null);
+function render(){let r=R.filter(x=>(!query||x.id.includes(query)||x.co.toLowerCase().includes(query))&&(!segFilterVal||x.seg===segFilterVal));
 r=r.sort((a,b)=>(a[sortK]>b[sortK]?1:a[sortK]<b[sortK]?-1:0)*sortDir);
-tcnt.textContent=`${r.length} of ${R.length} customers`;
-tbody.innerHTML=r.slice(0,300).map(x=>`<tr><td class=num>${pill(x.score)}</td><td>#${x.id}</td><td>${x.co}</td><td class=num>${x.rec}</td><td class=num>${x.freq}</td><td class=num>£${x.mon.toLocaleString()}</td><td class=num>£${x.val.toLocaleString()}</td><td>${x.last}</td></tr>`).join('');}
-document.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(k===sortK)sortDir*=-1;else{sortK=k;sortDir=(k==='id'||k==='co'||k==='last')?1:-1}
+tcnt.textContent=segFilterVal&&!inList.has(segFilterVal)
+  ?`0 of ${R.length} — "${segFilterVal}" customers are healthy, not on the call list`
+  :`${r.length} of ${R.length} customers`;
+tbody.innerHTML=r.slice(0,300).map(x=>`<tr><td class=num>${pill(x.score)}</td><td>#${x.id}</td><td>${segPill(x.seg)}</td><td>${x.co}</td><td class=num>${x.rec}</td><td class=num>${x.freq}</td><td class=num>£${x.mon.toLocaleString()}</td><td class=num>£${x.val.toLocaleString()}</td><td>${x.last}</td></tr>`).join('');}
+document.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(k===sortK)sortDir*=-1;else{sortK=k;sortDir=(k==='id'||k==='co'||k==='last'||k==='seg')?1:-1}
 document.querySelectorAll('th').forEach(t=>t.textContent=t.textContent.replace(/ [▾▴]/,''));th.textContent+=sortDir<0?' ▾':' ▴';render()});
 document.getElementById('q').oninput=e=>{query=e.target.value.toLowerCase().trim();render()};
-function flash(seg){const q=document.getElementById('q');q.style.borderColor='#4ade80';setTimeout(()=>q.style.borderColor='',600)}
 render();
 </script>
 </body></html>"""

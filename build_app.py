@@ -40,8 +40,21 @@ rows=[[int(r.CustomerID),r.country,int(r.recency),int(r.frequency),round(r.monet
 # ROI: cumulative est_reactivation_value by priority rank (for slider)
 cum=react.est_reactivation_value.cumsum().round().tolist()
 
+cohorts=json.load(open(OUT/"cohorts.json"))
+pareto=json.load(open(OUT/"pareto.json"))
+# per-point segment for cross-filtering: [recency, monetary, isTarget, segIdx]
+seg_names=[s["name"] for s in segs]
+seg_idx={n:i for i,n in enumerate(seg_names)}
+pts=[[int(r.recency),round(r.monetary,2),(1 if r.CustomerID in tgt_ids else 0),seg_idx[r.segment]]
+     for r in rfm.itertuples()]
+# call-list rows get segment too
+seg_by_id=dict(zip(rfm.CustomerID,rfm.segment))
+rows=[[int(r.CustomerID),r.country,int(r.recency),int(r.frequency),round(r.monetary),
+       round(r.est_reactivation_value),round(r.priority_score),seg_by_id.get(r.CustomerID,"")] for r in react.itertuples()]
+
 DATA=dict(m=m,months=months,mrev=mrev,segs=segs,pts=pts,rows=rows,cum=cum,
-          n_targets=len(react),total_idle=round(react.monetary.sum()))
+          n_targets=len(react),total_idle=round(react.monetary.sum()),
+          cohorts=cohorts,pareto=pareto,seg_names=seg_names)
 DJSON=json.dumps(DATA,separators=(",",":"))
 
 html=open("app_template.html").read().replace("/*__DATA__*/", "window.D="+DJSON+";")
