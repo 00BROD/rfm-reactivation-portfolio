@@ -5,6 +5,10 @@ Raw transactions → SQL warehouse → RFM segmentation → a ranked customer **
 
 **Headline:** 646 previously-valuable customers went dormant ~120 days, worth **£1.0M** of historical revenue — surfaced as an 807-row, priority-scored target list (`output/reactivation_targets.csv`).
 
+## Live dashboards
+- **HTML dashboard (live):** https://retail-reactivation.vercel.app
+- **Tableau Public:** _coming — built from `output/extracts/tableau_flat.csv` via `TABLEAU-PUBLIC-RECIPE.md`_
+
 ## Stack
 SQLite · Python (pandas, numpy, matplotlib) · SQL · self-contained HTML dashboard. Extracts feed Tableau / Power BI.
 
