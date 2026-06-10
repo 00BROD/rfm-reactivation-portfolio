@@ -1,0 +1,269 @@
+<!doctype html><html lang=en><head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>RFM & Dormant-Revenue Reactivation — Interactive Dashboard</title>
+<meta name=description content="Interactive RFM customer-segmentation dashboard on 540K real e-commerce transactions: finds 807 dormant high-value customers worth £1.3M and ranks them into a reactivation call list.">
+<meta property=og:title content="Dormant-Revenue Reactivation — RFM Analysis">
+<meta property=og:description content="540K transactions → 807 win-back customers worth £1.3M, ranked. SQL · Python · interactive.">
+<meta property=og:type content=website>
+<meta property=og:image content="https://retail-reactivation.vercel.app/og.png">
+<meta name=twitter:card content=summary_large_image>
+<link rel=icon href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2316223d'/><circle cx='16' cy='16' r='6' fill='%23e2574c'/></svg>">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root{--ink:#16223d;--ink2:#33405c;--acc:#e2574c;--gold:#d9a441;--mut:#7c869c;--line:#e7eaef;--bg:#f4f6f9;--card:#fff}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;color:var(--ink2);background:var(--bg);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:44px 22px 72px}
+a{color:var(--acc);text-decoration:none}
+.num{font-variant-numeric:tabular-nums}
+header{margin-bottom:30px}
+.eyebrow{color:var(--acc);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:0 0 10px}
+header h1{font-size:34px;line-height:1.04;letter-spacing:-.025em;font-weight:800;color:var(--ink);margin:0 0 10px;max-width:20ch}
+header p{color:var(--mut);margin:0;font-size:14px;font-variant-numeric:tabular-nums}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:30px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.kpi .v{font-size:25px;font-weight:750;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.kpi .l{color:var(--mut);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:7px}
+.kpi.hot{background:var(--ink);border-color:var(--ink)}.kpi.hot .v{color:#fff}.kpi.hot .l{color:#9fb0c9}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:18px 0}
+.card h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.lead{font-size:19px;line-height:1.5;color:var(--ink);max-width:60ch;margin:0;font-weight:450}
+.lead b{font-weight:700}.lead .hl{color:var(--acc);font-weight:700}
+.pill{display:inline-block;background:#fdecea;color:var(--acc);padding:2px 10px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap}
+.chart{width:100%;height:320px}
+/* signature */
+.sig{background:var(--ink);border:none;color:#fff;text-align:center;padding:40px 24px}
+.sig .lbl{color:#9fb0c9;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.sig .big{font-size:64px;font-weight:800;letter-spacing:-.03em;color:#fff;margin:10px 0 6px;font-variant-numeric:tabular-nums;line-height:1}
+.sig .big .acc{color:var(--acc)}
+.sig .sub{color:#cdd6e6;font-size:15px;max-width:48ch;margin:0 auto}
+/* roi */
+.roi{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center}
+.ctrl{margin:0 0 22px}
+.ctrl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.ctrl label b{color:var(--acc);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--acc);height:4px}
+.roiout{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:22px 24px;text-align:center}
+.roiout .v{font-size:42px;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05}
+.roiout .k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-top:8px}
+.roiout .row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);border-top:1px solid var(--line);padding-top:10px;margin-top:16px}
+.roiout .row span:last-child{font-weight:700;font-variant-numeric:tabular-nums}
+/* table */
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.search{flex:1;min-width:160px;padding:9px 13px;border:1px solid var(--line);border-radius:9px;font-size:13px;font-family:inherit;color:var(--ink)}
+.search:focus{outline:none;border-color:var(--acc)}
+.count{font-size:12px;color:var(--mut);white-space:nowrap}
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #eef1f5;white-space:nowrap}
+td{font-variant-numeric:tabular-nums}
+td.t{color:var(--acc);font-weight:600}
+th{color:var(--mut);font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:.04em;cursor:pointer;user-select:none}
+th:hover{color:var(--ink)}th.s::after{content:" \25BE";color:var(--acc)}th.s.asc::after{content:" \25B4"}
+tbody tr{transition:background .15s cubic-bezier(.16,1,.3,1)}
+tbody tr:hover{background:#f8fafc}
+.note{color:var(--mut);font-size:12px;margin:14px 0 0;line-height:1.6}
+.method li{margin:6px 0}
+footer{color:var(--mut);font-size:12px;margin-top:36px;padding-top:18px;border-top:1px solid var(--line);text-align:center}
+@media(prefers-reduced-motion:no-preference){
+ .rise{opacity:0;transform:translateY(12px);animation:rise .6s cubic-bezier(.16,1,.3,1) forwards}
+ .kpis .kpi:nth-child(1){animation-delay:.10s}.kpis .kpi:nth-child(2){animation-delay:.17s}
+ .kpis .kpi:nth-child(3){animation-delay:.24s}.kpis .kpi:nth-child(4){animation-delay:.31s}
+ .kpi,.card{transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s cubic-bezier(.16,1,.3,1)}
+ .kpi:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px rgba(22,34,61,.20)}
+}
+@keyframes rise{to{opacity:1;transform:none}}
+@media(max-width:760px){
+ .wrap{padding:28px 16px 56px}header h1{font-size:27px}
+ .kpis{grid-template-columns:1fr 1fr;gap:10px}
+ .grid2,.roi{grid-template-columns:1fr}
+ .sig .big{font-size:44px}
+}
+</style></head><body><div class=wrap>
+
+<header class=rise>
+ <p class=eyebrow>Customer Analytics · RFM Segmentation</p>
+ <h1>Where the dormant revenue is hiding</h1>
+ <p id=sub></p>
+</header>
+
+<div class=kpis>
+ <div class=kpi><div class="v num" data-k=revenue>£0</div><div class=l>Revenue</div></div>
+ <div class=kpi><div class="v num" data-k=customers>0</div><div class=l>Customers</div></div>
+ <div class=kpi><div class="v num" data-k=aov>£0</div><div class=l>Avg Order Value</div></div>
+ <div class="kpi hot"><div class="v num" data-k=idle>£0</div><div class=l>Dormant revenue at risk</div></div>
+</div>
+
+<div class=card>
+ <p class=lead id=lead></p>
+</div>
+
+<div class="card sig">
+ <div class=lbl>Proven revenue sitting idle right now</div>
+ <div class="big num" id=sigbig>£0</div>
+ <p class=sub id=sigsub></p>
+</div>
+
+<div class=grid2>
+ <div class=card><h2>Monthly revenue</h2><div id=cMonthly class=chart></div></div>
+ <div class=card><h2>Revenue by segment</h2><div id=cSeg class=chart></div></div>
+</div>
+<div class=card><h2>Dormant does not mean worthless — recency vs lifetime value</h2><div id=cScatter class=chart style=height:400px></div></div>
+
+<div class=card>
+ <h2>Reactivation ROI — what is the win-back worth?</h2>
+ <div class=roi>
+  <div>
+   <div class=ctrl><label>Customers to dial (by priority rank) <b id=lN>100</b></label>
+    <input type=range id=sN min=10 max=807 value=100 step=10></div>
+   <div class=ctrl><label>Assumed reactivation rate <b id=lC>20%</b></label>
+    <input type=range id=sC min=5 max=50 value=20 step=1></div>
+   <p class=note>Each reactivated customer is modelled to place one order at their historical average order value.
+   Targets are dialled highest-priority first, so early calls carry the most value.</p>
+  </div>
+  <div class=roiout>
+   <div class="v num" id=roiV>£0</div><div class=k>Projected recovered revenue</div>
+   <div class=row><span>Calls to make</span><span class=num id=roiCalls>100</span></div>
+   <div class=row><span>Expected reactivations</span><span class=num id=roiConv>20</span></div>
+   <div class=row><span>Revenue per call made</span><span class=num id=roiPer>£0</span></div>
+  </div>
+ </div>
+</div>
+
+<div class=card>
+ <h2>Top reactivation targets — the call list</h2>
+ <div class=toolbar>
+  <input class=search id=q placeholder="Search by customer ID or country…">
+  <span class=count id=count></span>
+ </div>
+ <div class=tbl><table>
+  <thead><tr>
+   <th data-c=0>Customer</th><th data-c=1>Country</th><th data-c=2>Dormant (d)</th>
+   <th data-c=3>Orders</th><th data-c=4>Lifetime £</th><th data-c=5>Est. next order</th>
+   <th data-c=6 class="s">Priority</th>
+  </tr></thead>
+  <tbody id=tb></tbody>
+ </table></div>
+ <p class=note>Showing top 60 rows. Full ranked list (<span id=nfull></span> customers) in <code>reactivation_targets.csv</code>.
+ Priority = 0.5·monetary + 0.3·frequency + 0.2·recency (percentile-ranked).</p>
+</div>
+
+<div class="card method">
+ <h2>Method & caveats</h2>
+ <ul class=note style=margin-top:0>
+  <li><b>Data:</b> UCI Online Retail — a real UK gift e-commerce dataset, 541,909 rows, Dec 2010 – Dec 2011.</li>
+  <li><b>Cleaning:</b> kept rows with a known customer, positive quantity and price; cancellations (invoices starting “C”) excluded. 397,884 sale rows remain.</li>
+  <li><b>RFM:</b> Recency, Frequency, Monetary each scored 1–4 by quartile (NTILE). Snapshot date = one day after the last invoice.</li>
+  <li><b>Dormancy threshold:</b> a customer is a reactivation target if dormant ≥ 90 days <i>and</i> a top-half lifetime spender, or already flagged “At Risk (was valuable)”.</li>
+  <li><b>ROI model:</b> one recovered order per reactivation at the customer’s historical average order value. Illustrative, not a forecast.</li>
+ </ul>
+</div>
+
+<footer>Raw transactions → SQLite → SQL + Python (pandas) → RFM model → ECharts. Source &amp; reproducible pipeline on <a href="https://github.com/00BROD/rfm-reactivation-portfolio">GitHub</a>.</footer>
+</div>
+
+<script>/*__DATA__*/</script>
+<script>
+const D=window.D, m=D.m;
+const gbp=x=>"£"+Math.round(x).toLocaleString("en-GB");
+const sub=`UCI Online Retail · UK e-commerce · ${m.date_min} to ${m.date_max} · ${m.orders.toLocaleString()} orders analysed`;
+document.getElementById("sub").textContent=sub;
+document.getElementById("lead").innerHTML=
+ `<b>${m.react_customers} previously-valuable customers</b> have gone quiet for an average of `+
+ `<b>${m.react_avg_dormant_days} days</b>, together representing <span class=hl>${gbp(m.react_historical_rev)}</span> `+
+ `of historical revenue. They are not lost. They are <span class=pill>un-called</span>: warm, proven buyers who `+
+ `simply stopped, and the highest-ROI list a sales team can dial.`;
+document.getElementById("sigsub").innerHTML=
+ `${m.react_customers} dormant customers who already bought ${(D.rows.reduce((a,r)=>a+r[3],0)).toLocaleString()} times between them. Not leads — proof.`;
+document.getElementById("nfull").textContent=D.n_targets;
+
+// ---- count-up (pre-seed final values so they're correct even without animation) ----
+const KV={revenue:m.revenue,customers:m.customers,aov:m.aov,idle:m.react_historical_rev};
+document.querySelectorAll("[data-k]").forEach(el=>el.textContent=(el.dataset.k==="customers"?KV[el.dataset.k].toLocaleString():gbp(KV[el.dataset.k])));
+document.getElementById("sigbig").textContent=gbp(D.total_idle);
+function countUp(el,val,money){const dur=1100,t0=performance.now();
+ (function f(t){let p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);
+  const v=Math.round(val*p);el.textContent=money?gbp(v):v.toLocaleString();
+  if(p<1)requestAnimationFrame(f);})(t0);}
+const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){
+ const el=e.target,k=el.dataset.k;io.unobserve(el);
+ countUp(el,{revenue:m.revenue,customers:m.customers,aov:m.aov,idle:m.react_historical_rev}[k],k!=="customers");
+}}),{threshold:.5});
+document.querySelectorAll("[data-k]").forEach(el=>io.observe(el));
+const sigO=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){
+ sigO.unobserve(e.target);countUp(e.target,D.total_idle,true);}}),{threshold:.6});
+sigO.observe(document.getElementById("sigbig"));
+
+// ---- charts ----
+const AX={axisLine:{lineStyle:{color:"#d4dae3"}},axisLabel:{color:"#7c869c",fontSize:11},
+ splitLine:{lineStyle:{color:"#eef1f5"}}};
+const TIP={trigger:"axis",backgroundColor:"#16223d",borderColor:"#16223d",
+ textStyle:{color:"#fff",fontSize:12},axisPointer:{lineStyle:{color:"#c7ccd6"}}};
+const charts=[];
+function mk(id,opt){const c=echarts.init(document.getElementById(id));c.setOption(opt);charts.push(c);}
+addEventListener("resize",()=>charts.forEach(c=>c.resize()));
+
+mk("cMonthly",{grid:{left:54,right:16,top:18,bottom:46},tooltip:Object.assign({},TIP,
+  {valueFormatter:gbp}),xAxis:Object.assign({type:"category",data:D.months,axisLabel:{color:"#7c869c",fontSize:10,rotate:38}},AX),
+ yAxis:Object.assign({type:"value",axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v/1000)+"k"}},AX),
+ series:[{type:"line",data:D.mrev,smooth:true,symbol:"circle",symbolSize:7,
+  lineStyle:{color:"#16223d",width:2.5},itemStyle:{color:"#16223d"},
+  areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:"rgba(22,34,61,.14)"},{offset:1,color:"rgba(22,34,61,0)"}])}}]});
+
+mk("cSeg",{grid:{left:140,right:60,top:10,bottom:30},tooltip:Object.assign({},TIP,{trigger:"item",
+  formatter:o=>`${o.name}<br>${gbp(o.value)} · ${D.segs.find(s=>s.name===o.name).cust} customers`}),
+ xAxis:Object.assign({type:"value",axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v/1e6)+"M"}},AX),
+ yAxis:Object.assign({type:"category",data:D.segs.map(s=>s.name).reverse()},AX),
+ series:[{type:"bar",barWidth:"58%",data:D.segs.map(s=>({value:s.rev,
+   itemStyle:{color:s.name.startsWith("At Risk")?"#e2574c":(s.name==="Champions"?"#d9a441":"#aab2c2"),
+   borderRadius:[0,4,4,0]}})).reverse(),
+  label:{show:true,position:"right",color:"#16223d",fontSize:11,formatter:o=>gbp(o.value)}}]});
+
+const split=k=>D.pts.filter(p=>p[2]===k).map(p=>[p[0],p[1]]);
+mk("cScatter",{grid:{left:64,right:20,top:16,bottom:48},
+ tooltip:Object.assign({},TIP,{trigger:"item",formatter:o=>`Dormant ${o.value[0]} days<br>Lifetime ${gbp(o.value[1])}`}),
+ legend:{data:["Reactivation target","Other customers"],bottom:0,textStyle:{color:"#7c869c",fontSize:12},icon:"circle"},
+ xAxis:Object.assign({type:"value",name:"Days since last purchase",nameLocation:"middle",nameGap:30,
+  nameTextStyle:{color:"#7c869c",fontSize:12}},AX),
+ yAxis:Object.assign({type:"log",name:"Lifetime revenue (£)",nameLocation:"middle",nameGap:46,
+  nameTextStyle:{color:"#7c869c",fontSize:12},axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v>=1000?(v/1000)+"k":v)}},AX),
+ series:[
+  {name:"Other customers",type:"scatter",data:split(0),symbolSize:5,itemStyle:{color:"#aab2c2",opacity:.35}},
+  {name:"Reactivation target",type:"scatter",data:split(1),symbolSize:6,itemStyle:{color:"#e2574c",opacity:.78}}
+ ]});
+
+// ---- ROI ----
+const sN=document.getElementById("sN"),sC=document.getElementById("sC");
+function roi(){const n=+sN.value,c=+sC.value;
+ const pool=D.cum[n-1];                       // total est value of top-n targets
+ const rev=pool*c/100, conv=Math.round(n*c/100);
+ document.getElementById("lN").textContent=n;
+ document.getElementById("lC").textContent=c+"%";
+ document.getElementById("roiV").textContent=gbp(rev);
+ document.getElementById("roiCalls").textContent=n.toLocaleString();
+ document.getElementById("roiConv").textContent=conv.toLocaleString();
+ document.getElementById("roiPer").textContent=gbp(rev/n);}
+sN.oninput=roi;sC.oninput=roi;roi();
+
+// ---- call list: search + sort ----
+const tb=document.getElementById("tb"),q=document.getElementById("q"),count=document.getElementById("count");
+let sortC=6,asc=false;
+const fmt=[v=>`<td class=t>${v}</td>`,v=>`<td>${v}</td>`,v=>`<td>${v}</td>`,v=>`<td>${v}</td>`,
+ v=>`<td>${gbp(v)}</td>`,v=>`<td>${gbp(v)}</td>`,v=>`<td><b>${v}</b></td>`];
+function render(){
+ const term=q.value.trim().toLowerCase();
+ let r=D.rows.filter(x=>!term||(""+x[0]).includes(term)||x[1].toLowerCase().includes(term));
+ r.sort((a,b)=>{const d=typeof a[sortC]==="number"?a[sortC]-b[sortC]:(""+a[sortC]).localeCompare(b[sortC]);return asc?d:-d;});
+ count.textContent=`${r.length.toLocaleString()} of ${D.n_targets}`;
+ tb.innerHTML=r.slice(0,60).map(x=>"<tr>"+x.map((v,i)=>fmt[i](v)).join("")+"</tr>").join("");
+}
+q.oninput=render;
+document.querySelectorAll("th[data-c]").forEach(th=>th.onclick=()=>{
+ const c=+th.dataset.c;asc=(c===sortC)?!asc:false;sortC=c;
+ document.querySelectorAll("th").forEach(h=>h.classList.remove("s","asc"));
+ th.classList.add("s");if(asc)th.classList.add("asc");render();});
+render();
+</script>
+</body></html>
