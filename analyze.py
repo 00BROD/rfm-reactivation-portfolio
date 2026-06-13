@@ -26,7 +26,9 @@ snapshot = sales.InvoiceDate.max() + pd.Timedelta(days=1)
 # ---- RFM --------------------------------------------------------------------
 rfm = sales.groupby("CustomerID").agg(
     recency  =("InvoiceDate", lambda s:(snapshot - s.max()).days),
-    frequency=("InvoiceNo", "nunique"),
+    # frequency = distinct purchase OCCASIONS (days), not invoices — avoids same-day
+    # invoice-splitting inflating loyalty (e.g. a test account with 34 invoices in 2 days)
+    frequency=("InvoiceDate", lambda s: s.dt.date.nunique()),
     monetary =("Revenue", "sum"),
     last_purchase=("InvoiceDate","max"),
     country  =("Country", lambda s:s.mode().iat[0]),
@@ -51,9 +53,12 @@ rfm.to_csv(EXT/"rfm_customers.csv", index=False)
 # Dormant (recency high) but historically valuable (M>=3 or was a frequent buyer).
 react = rfm[(rfm.segment=="At Risk (was valuable)") |
             ((rfm.recency>=90) & (rfm.M>=3))].copy()
+# Priority = value × win-back likelihood. Recency is INVERTED: a more recently
+# lapsed customer is a warmer, more reachable prospect than one gone a year — so
+# LESS dormant scores higher (1 - recency_rank), not more.
 react["priority_score"]=(react.monetary.rank(pct=True)*0.5
                         +react.frequency.rank(pct=True)*0.3
-                        +react.recency.rank(pct=True)*0.2)*100
+                        +(1-react.recency.rank(pct=True))*0.2)*100
 react=react.sort_values("priority_score", ascending=False)
 react["est_reactivation_value"]=(react.monetary/react.frequency).round(2)  # ~avg order value
 react[["CustomerID","country","recency","frequency","monetary",
@@ -120,15 +125,22 @@ plt.tight_layout(); plt.savefig(CHT/"country_revenue.png", dpi=200); plt.close()
 
 # ---- metrics.json (feeds dashboard + exec summary) --------------------------
 tot=float(sales.Revenue.sum())
-react_rev=float(react.monetary.sum())
+react_rev=float(react.monetary.sum())                 # lapsed lifetime value (pool, NOT recoverable)
+RECOVER_RATE=0.08                                     # defensible blended win-back rate (see README)
+recoverable=float(react.est_reactivation_value.sum())*RECOVER_RATE   # one order each @ rate
+# Pareto computed, not hardcoded
+cv=rfm.monetary.sort_values(ascending=False).cumsum()/rfm.monetary.sum()
+top10=int(round(100*cv.iloc[int(len(cv)*0.10)-1])); top20=int(round(100*cv.iloc[int(len(cv)*0.20)-1]))
 metrics=dict(
   revenue=round(tot), orders=int(sales.InvoiceNo.nunique()),
   customers=int(sales.CustomerID.nunique()),
   aov=round(tot/sales.InvoiceNo.nunique(),2),
   date_min=str(sales.InvoiceDate.min().date()), date_max=str(sales.InvoiceDate.max().date()),
-  top10_pct_rev=61, top20_pct_rev=75,
+  top10_pct_rev=top10, top20_pct_rev=top20,
   react_customers=int(len(react)),
-  react_historical_rev=round(react_rev),
+  react_historical_rev=round(react_rev),               # = lapsed LTV pool
+  recoverable_est=round(recoverable),
+  recover_rate=int(RECOVER_RATE*100),
   react_avg_dormant_days=int(react.recency.mean()),
   champions_rev=round(float(rfm.loc[rfm.segment=="Champions","monetary"].sum())),
   segments=seg.to_dict("records"),

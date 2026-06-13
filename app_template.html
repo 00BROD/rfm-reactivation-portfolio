@@ -1,17 +1,17 @@
 <!doctype html><html lang=en><head>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>RFM & Dormant-Revenue Reactivation — Interactive Dashboard</title>
-<meta name=description content="Interactive RFM customer-segmentation dashboard on 540K real e-commerce transactions: finds 807 dormant high-value customers worth £1.3M and ranks them into a reactivation call list.">
-<meta property=og:title content="Dormant-Revenue Reactivation — RFM Analysis">
-<meta property=og:description content="540K transactions → 807 win-back customers worth £1.3M, ranked. SQL · Python · interactive.">
+<title>RFM & Dormant-Revenue Reactivation: Interactive Dashboard</title>
+<meta name=description content="Interactive RFM customer-segmentation dashboard on 540K real e-commerce transactions: finds 809 lapsed high-value customers holding £1.2M in lifetime value and ranks the realistically recoverable revenue into a prioritised call list.">
+<meta property=og:title content="Dormant-Revenue Reactivation: RFM Analysis">
+<meta property=og:description content="396K clean transactions, 809 lapsed customers, recoverable revenue modelled and ranked. SQL · Python · interactive.">
 <meta property=og:type content=website>
 <meta property=og:image content="https://retail-reactivation.vercel.app/og.png">
 <meta name=twitter:card content=summary_large_image>
 <link rel=icon href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23221E1A'/><circle cx='16' cy='16' r='6' fill='%23C0532E'/></svg>">
 <link rel=preconnect href="https://fonts.googleapis.com"><link rel=preconnect href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel=stylesheet>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="echarts.min.js"></script>
 <style>
 :root{
  --ink:#221E1A;        /* warm near-black — headings, ink */
@@ -118,7 +118,7 @@ footer{color:var(--mut);font-size:12px;margin-top:44px;padding-top:22px;border-t
  <div class=kpi><div class="v num" data-k=revenue>£0</div><div class=l>Revenue</div></div>
  <div class=kpi><div class="v num" data-k=customers>0</div><div class=l>Customers</div></div>
  <div class=kpi><div class="v num" data-k=aov>£0</div><div class=l>Avg Order Value</div></div>
- <div class="kpi hot"><div class="v num" data-k=idle>£0</div><div class=l>Dormant revenue at risk</div></div>
+ <div class="kpi hot"><div class="v num" data-k=idle>£0</div><div class=l>Lapsed lifetime value</div></div>
 </div>
 
 <div class=card>
@@ -126,7 +126,7 @@ footer{color:var(--mut);font-size:12px;margin-top:44px;padding-top:22px;border-t
 </div>
 
 <div class="card sig">
- <div class=lbl>Proven revenue sitting idle right now</div>
+ <div class=lbl>Modelled recoverable revenue · conservative <span id=sigrate>8</span>% win-back</div>
  <div class="big num" id=sigbig>£0</div>
  <p class=sub id=sigsub></p>
 </div>
@@ -135,26 +135,27 @@ footer{color:var(--mut);font-size:12px;margin-top:44px;padding-top:22px;border-t
  <div class=card><h2>Monthly revenue</h2><div id=cMonthly class=chart></div></div>
  <div class=card><h2>Revenue by segment</h2><div id=cSeg class=chart></div></div>
 </div>
-<div class=card><h2>Dormant does not mean worthless — recency vs lifetime value <span class=filterchip id=chip hidden></span></h2><div id=cScatter class=chart style=height:400px></div>
+<div class=card><h2>Dormant does not mean worthless: recency vs lifetime value <span class=filterchip id=chip hidden></span></h2><div id=cScatter class=chart style=height:400px></div>
 <p class=note>Tip: click a bar in “Revenue by segment” to filter this scatter and the call list to that segment. Click again to clear.</p></div>
 
 <div class=grid2>
- <div class=card><h2>Revenue concentration — the Pareto curve</h2><div id=cPareto class=chart></div>
+ <div class=card><h2>Revenue concentration: the Pareto curve</h2><div id=cPareto class=chart></div>
   <p class=note>The top 10% of customers generate 61% of revenue; the top 20% generate 75%. Retention beats acquisition.</p></div>
- <div class=card><h2>Cohort retention — % active in months after first purchase</h2><div id=cCohort class=chart></div>
-  <p class=note>Each row is a monthly acquisition cohort. The Dec-2010 cohort keeps returning at 32–50% for a full year — the loyal core RFM later identifies as Champions.</p></div>
+ <div class=card><h2>Cohort retention: % active in months after first purchase</h2><div id=cCohort class=chart></div>
+  <p class=note>Each row is a monthly acquisition cohort. The Dec-2010 cohort keeps returning at 32-50% for a full year. The loyal core RFM later identifies as Champions.</p></div>
 </div>
 
 <div class=card>
- <h2>Reactivation ROI — what is the win-back worth?</h2>
+ <h2>Reactivation ROI: what is the win-back worth?</h2>
  <div class=roi>
   <div>
    <div class=ctrl><label>Customers to dial (by priority rank) <b id=lN>100</b></label>
     <input type=range id=sN min=10 max=807 value=100 step=10></div>
-   <div class=ctrl><label>Assumed reactivation rate <b id=lC>20%</b></label>
-    <input type=range id=sC min=5 max=50 value=20 step=1></div>
-   <p class=note>Each reactivated customer is modelled to place one order at their historical average order value.
-   Targets are dialled highest-priority first, so early calls carry the most value.</p>
+   <div class=ctrl><label>Assumed reactivation rate <b id=lC>8%</b></label>
+    <input type=range id=sC min=1 max=30 value=8 step=1></div>
+   <p class=note>Each reactivated customer is modelled to place <b>one</b> order at their own historical average order value;
+   targets are dialled highest-priority first, so early calls carry the most value. Benchmark: email win-back campaigns
+   typically convert 1-5%, outbound phone to known customers higher. 8% is a deliberately conservative default, not a promise.</p>
   </div>
   <div class=roiout>
    <div class="v num" id=roiV>£0</div><div class=k>Projected recovered revenue</div>
@@ -166,7 +167,7 @@ footer{color:var(--mut);font-size:12px;margin-top:44px;padding-top:22px;border-t
 </div>
 
 <div class=card>
- <h2>Top reactivation targets — the call list</h2>
+ <h2>Top reactivation targets: the call list</h2>
  <div class=toolbar>
   <input class=search id=q placeholder="Search by customer ID or country…">
   <span class=count id=count></span>
@@ -186,9 +187,9 @@ footer{color:var(--mut);font-size:12px;margin-top:44px;padding-top:22px;border-t
 <div class="card method">
  <h2>Method & caveats</h2>
  <ul class=note style=margin-top:0>
-  <li><b>Data:</b> UCI Online Retail — a real UK gift e-commerce dataset, 541,909 rows, Dec 2010 – Dec 2011.</li>
+  <li><b>Data:</b> UCI Online Retail: a real UK gift e-commerce dataset, 541,909 rows, Dec 2010 to Dec 2011.</li>
   <li><b>Cleaning:</b> kept rows with a known customer, positive quantity and price; cancellations (invoices starting “C”) excluded. 397,884 sale rows remain.</li>
-  <li><b>RFM:</b> Recency, Frequency, Monetary each scored 1–4 by quartile (NTILE). Snapshot date = one day after the last invoice.</li>
+  <li><b>RFM:</b> Recency, Frequency, Monetary each scored 1-4 by quartile (NTILE). Snapshot date = one day after the last invoice.</li>
   <li><b>Dormancy threshold:</b> a customer is a reactivation target if dormant ≥ 90 days <i>and</i> a top-half lifetime spender, or already flagged “At Risk (was valuable)”.</li>
   <li><b>ROI model:</b> one recovered order per reactivation at the customer’s historical average order value. Illustrative, not a forecast.</li>
  </ul>
@@ -203,19 +204,22 @@ const D=window.D, m=D.m;
 const gbp=x=>"£"+Math.round(x).toLocaleString("en-GB");
 const sub=`UCI Online Retail · UK e-commerce · ${m.date_min} to ${m.date_max} · ${m.orders.toLocaleString()} orders analysed`;
 document.getElementById("sub").textContent=sub;
+document.getElementById("sigrate").textContent=m.recover_rate;
 document.getElementById("lead").innerHTML=
  `<b>${m.react_customers} previously-valuable customers</b> have gone quiet for an average of `+
  `<b>${m.react_avg_dormant_days} days</b>, together representing <span class=hl>${gbp(m.react_historical_rev)}</span> `+
- `of historical revenue. They are not lost. They are <span class=pill>un-called</span>: warm, proven buyers who `+
- `simply stopped, and the highest-ROI list a sales team can dial.`;
+ `in lapsed lifetime value. That is the pool, not the prize: a conservative ${m.recover_rate}% win-back models to `+
+ `<span class=hl>${gbp(m.recoverable_est)}</span> recovered. They are <span class=pill>un-called</span>: warm, proven `+
+ `buyers who simply stopped, and the highest-ROI list a sales team can dial.`;
 document.getElementById("sigsub").innerHTML=
- `${m.react_customers} dormant customers who already bought ${(D.rows.reduce((a,r)=>a+r[3],0)).toLocaleString()} times between them. Not leads — proof.`;
+ `Drawn from ${gbp(m.react_historical_rev)} in lapsed lifetime value across ${m.react_customers} proven customers, `+
+ `modelled at a conservative ${m.recover_rate}% reactivation rate. Adjust the assumptions yourself below.`;
 document.getElementById("nfull").textContent=D.n_targets;
 
 // ---- count-up (pre-seed final values so they're correct even without animation) ----
 const KV={revenue:m.revenue,customers:m.customers,aov:m.aov,idle:m.react_historical_rev};
 document.querySelectorAll("[data-k]").forEach(el=>el.textContent=(el.dataset.k==="customers"?KV[el.dataset.k].toLocaleString():gbp(KV[el.dataset.k])));
-document.getElementById("sigbig").textContent=gbp(D.total_idle);
+document.getElementById("sigbig").textContent=gbp(m.recoverable_est);
 function countUp(el,val,money){const dur=1100,t0=performance.now();
  (function f(t){let p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);
   const v=Math.round(val*p);el.textContent=money?gbp(v):v.toLocaleString();
@@ -226,7 +230,7 @@ const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){
 }}),{threshold:.5});
 document.querySelectorAll("[data-k]").forEach(el=>io.observe(el));
 const sigO=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){
- sigO.unobserve(e.target);countUp(e.target,D.total_idle,true);}}),{threshold:.6});
+ sigO.unobserve(e.target);countUp(e.target,m.recoverable_est,true);}}),{threshold:.6});
 sigO.observe(document.getElementById("sigbig"));
 
 // ---- charts ----
@@ -315,6 +319,7 @@ mk("cCohort",{grid:{left:74,right:14,top:8,bottom:64},
 
 // ---- ROI ----
 const sN=document.getElementById("sN"),sC=document.getElementById("sC");
+sN.max=D.n_targets;
 function roi(){const n=+sN.value,c=+sC.value;
  const pool=D.cum[n-1];                       // total est value of top-n targets
  const rev=pool*c/100, conv=Math.round(n*c/100);

@@ -59,6 +59,13 @@ DATA=dict(m=m,months=months,mrev=mrev,segs=segs,pts=pts,rows=rows,cum=cum,
           cohorts=cohorts,pareto=pareto,seg_names=seg_names)
 DJSON=json.dumps(DATA,separators=(",",":"))
 
+# vendor echarts locally (same-origin) so blocked CDNs can't blank charts in a live demo
+ECH=SITE/"echarts.min.js"
+if not ECH.exists():
+    import urllib.request
+    print("fetching echarts.min.js (one-time)...",flush=True)
+    urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js",ECH)
+
 html=open("app_template.html").read().replace("/*__DATA__*/", "window.D="+DJSON+";")
 (SITE/"index.html").write_text(html)
 (OUT/"dashboard.html").write_text(html)

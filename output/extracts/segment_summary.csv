@@ -1,6 +1,6 @@
 segment,customers,revenue,avg_recency,avg_orders
-At Risk (was valuable),646,1040932.7,119.2,4.2
-Champions,1319,6506542.0,17.1,9.4
-Lapsed / Low,1504,767146.8,186.6,1.3
-Loyal,610,504670.8,23.4,2.2
-Recent / New,259,92115.6,27.1,1.0
+At Risk (was valuable),647,911728.7,118.6,3.8
+Champions,1309,6361772.5,17.0,8.3
+Lapsed / Low,1505,790452.6,186.9,1.2
+Loyal,614,350157.1,23.3,2.1
+Recent / New,258,101302.5,27.3,1.0

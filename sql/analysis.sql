@@ -66,7 +66,7 @@ WITH snapshot AS (SELECT DATE(MAX(InvoiceDate), '+1 day') AS snap FROM sales),
 rfm AS (
   SELECT CustomerID,
          CAST(julianday((SELECT snap FROM snapshot)) - julianday(MAX(InvoiceDate)) AS INT) AS recency,
-         COUNT(DISTINCT InvoiceNo) AS frequency,
+         COUNT(DISTINCT DATE(InvoiceDate)) AS frequency,   -- purchase OCCASIONS (days), not split invoices
          ROUND(SUM(Revenue), 2)    AS monetary
   FROM sales GROUP BY CustomerID
 ),

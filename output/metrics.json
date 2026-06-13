@@ -1,50 +1,52 @@
 {
-  "revenue": 8911408,
-  "orders": 18532,
-  "customers": 4338,
-  "aov": 480.87,
+  "revenue": 8515413,
+  "orders": 18400,
+  "customers": 4333,
+  "aov": 462.79,
   "date_min": "2010-12-01",
   "date_max": "2011-12-09",
-  "top10_pct_rev": 61,
-  "top20_pct_rev": 75,
-  "react_customers": 807,
-  "react_historical_rev": 1322135,
-  "react_avg_dormant_days": 135,
-  "champions_rev": 6506542,
+  "top10_pct_rev": 60,
+  "top20_pct_rev": 74,
+  "react_customers": 809,
+  "react_historical_rev": 1208740,
+  "recoverable_est": 36765,
+  "recover_rate": 8,
+  "react_avg_dormant_days": 134,
+  "champions_rev": 6361773,
   "segments": [
     {
       "segment": "At Risk (was valuable)",
-      "customers": 646,
-      "revenue": 1040932.7,
-      "avg_recency": 119.2,
-      "avg_orders": 4.2
+      "customers": 647,
+      "revenue": 911728.7,
+      "avg_recency": 118.6,
+      "avg_orders": 3.8
     },
     {
       "segment": "Champions",
-      "customers": 1319,
-      "revenue": 6506542.0,
-      "avg_recency": 17.1,
-      "avg_orders": 9.4
+      "customers": 1309,
+      "revenue": 6361772.5,
+      "avg_recency": 17.0,
+      "avg_orders": 8.3
     },
     {
       "segment": "Lapsed / Low",
-      "customers": 1504,
-      "revenue": 767146.8,
-      "avg_recency": 186.6,
-      "avg_orders": 1.3
+      "customers": 1505,
+      "revenue": 790452.6,
+      "avg_recency": 186.9,
+      "avg_orders": 1.2
     },
     {
       "segment": "Loyal",
-      "customers": 610,
-      "revenue": 504670.8,
-      "avg_recency": 23.4,
-      "avg_orders": 2.2
+      "customers": 614,
+      "revenue": 350157.1,
+      "avg_recency": 23.3,
+      "avg_orders": 2.1
     },
     {
       "segment": "Recent / New",
-      "customers": 259,
-      "revenue": 92115.6,
-      "avg_recency": 27.1,
+      "customers": 258,
+      "revenue": 101302.5,
+      "avg_recency": 27.3,
       "avg_orders": 1.0
     }
   ]
