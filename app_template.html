@@ -8,80 +8,103 @@
 <meta property=og:type content=website>
 <meta property=og:image content="https://retail-reactivation.vercel.app/og.png">
 <meta name=twitter:card content=summary_large_image>
-<link rel=icon href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2316223d'/><circle cx='16' cy='16' r='6' fill='%23e2574c'/></svg>">
+<link rel=icon href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23221E1A'/><circle cx='16' cy='16' r='6' fill='%23C0532E'/></svg>">
+<link rel=preconnect href="https://fonts.googleapis.com"><link rel=preconnect href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel=stylesheet>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
-:root{--ink:#16223d;--ink2:#33405c;--acc:#e2574c;--gold:#d9a441;--mut:#7c869c;--line:#e7eaef;--bg:#f4f6f9;--card:#fff}
+:root{
+ --ink:#221E1A;        /* warm near-black — headings, ink */
+ --ink2:#4C463E;       /* warm charcoal — body text */
+ --acc:#C0532E;        /* terracotta — single hero accent */
+ --acc-deep:#A8431F;   /* hover */
+ --acc-tint:#F3E5DB;   /* terracotta wash for pills */
+ --brass:#A98140;      /* muted brass — secondary data tone */
+ --mut:#9B9080;        /* warm taupe — labels */
+ --line:#EAE2D4;       /* warm hairline */
+ --bg:#FAF6EE;         /* warm ivory paper */
+ --bg2:#F3EDE1;        /* recessed warm panel */
+ --card:#FFFDFA;       /* warm white card */
+ --serif:"Fraunces",Georgia,"Times New Roman",serif;
+ --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;
+ --shadow:0 1px 2px rgba(50,38,24,.04),0 18px 40px -24px rgba(50,38,24,.18);
+ --shadow-sm:0 1px 2px rgba(50,38,24,.04),0 8px 22px -16px rgba(50,38,24,.16);
+}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
-body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;color:var(--ink2);background:var(--bg);-webkit-font-smoothing:antialiased}
-.wrap{max-width:1060px;margin:0 auto;padding:44px 22px 72px}
-a{color:var(--acc);text-decoration:none}
+body{margin:0;font:15px/1.65 var(--sans);color:var(--ink2);background:var(--bg);-webkit-font-smoothing:antialiased;
+ background-image:radial-gradient(120% 60% at 50% -10%,#FDFBF6 0%,var(--bg) 46%)}
+.wrap{max-width:1040px;margin:0 auto;padding:64px 26px 96px}
+a{color:var(--acc);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+a:hover{border-color:var(--acc)}
 .num{font-variant-numeric:tabular-nums}
-header{margin-bottom:30px}
-.eyebrow{color:var(--acc);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin:0 0 10px}
-header h1{font-size:34px;line-height:1.04;letter-spacing:-.025em;font-weight:800;color:var(--ink);margin:0 0 10px;max-width:20ch}
-header p{color:var(--mut);margin:0;font-size:14px;font-variant-numeric:tabular-nums}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:30px 0}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
-.kpi .v{font-size:25px;font-weight:750;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
-.kpi .l{color:var(--mut);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:7px}
-.kpi.hot{background:var(--ink);border-color:var(--ink)}.kpi.hot .v{color:#fff}.kpi.hot .l{color:#9fb0c9}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:18px 0}
-.card h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 18px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.lead{font-size:19px;line-height:1.5;color:var(--ink);max-width:60ch;margin:0;font-weight:450}
-.lead b{font-weight:700}.lead .hl{color:var(--acc);font-weight:700}
-.pill{display:inline-block;background:#fdecea;color:var(--acc);padding:2px 10px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap}
+header{margin-bottom:40px}
+.eyebrow{color:var(--acc);font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin:0 0 16px}
+header h1{font-family:var(--serif);font-size:46px;line-height:1.02;letter-spacing:-.015em;font-weight:600;color:var(--ink);margin:0 0 14px;max-width:18ch;font-optical-sizing:auto}
+header p{color:var(--mut);margin:0;font-size:13.5px;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:36px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 22px 20px;box-shadow:var(--shadow-sm)}
+.kpi .v{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+.kpi .l{color:var(--mut);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-top:11px}
+.kpi.hot{background:linear-gradient(155deg,#2C2620,#1C1814);border-color:#2C2620}.kpi.hot .v{color:#FBF3E6}.kpi.hot .l{color:#C9A98A}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 32px;margin:24px 0;box-shadow:var(--shadow)}
+.card h2{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.11em;color:var(--mut);margin:0 0 22px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.lead{font-family:var(--serif);font-size:24px;line-height:1.5;color:var(--ink);max-width:34ch;margin:0;font-weight:400;letter-spacing:-.005em}
+.lead b{font-weight:600}.lead .hl{color:var(--acc);font-weight:600}
+.pill{display:inline-block;background:var(--acc-tint);color:var(--acc-deep);padding:2px 11px;border-radius:20px;font-size:.62em;font-weight:600;white-space:nowrap;vertical-align:middle;font-family:var(--sans);letter-spacing:.02em;position:relative;top:-2px}
 .chart{width:100%;height:320px}
-/* signature */
-.sig{background:var(--ink);border:none;color:#fff;text-align:center;padding:40px 24px}
-.sig .lbl{color:#9fb0c9;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
-.sig .big{font-size:64px;font-weight:800;letter-spacing:-.03em;color:#fff;margin:10px 0 6px;font-variant-numeric:tabular-nums;line-height:1}
+/* signature — framed feature wall */
+.sig{background:linear-gradient(160deg,#2C2620 0%,#1B1713 100%);border:none;color:#FBF3E6;text-align:center;padding:64px 28px;border-radius:22px;position:relative;overflow:hidden}
+.sig::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 120% at 50% -20%,rgba(192,83,46,.20),transparent 60%);pointer-events:none}
+.sig .lbl{color:#C9A98A;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;position:relative}
+.sig .big{font-family:var(--serif);font-size:82px;font-weight:600;letter-spacing:-.02em;color:#FBF3E6;margin:16px 0 12px;font-variant-numeric:tabular-nums;line-height:.96;position:relative}
 .sig .big .acc{color:var(--acc)}
-.sig .sub{color:#cdd6e6;font-size:15px;max-width:48ch;margin:0 auto}
+.sig .sub{color:#D8C9B6;font-size:15px;max-width:46ch;margin:0 auto;line-height:1.6;position:relative}
 /* roi */
-.roi{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center}
-.ctrl{margin:0 0 22px}
-.ctrl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px}
-.ctrl label b{color:var(--acc);font-variant-numeric:tabular-nums}
+.roi{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center}
+.ctrl{margin:0 0 26px}
+.ctrl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:11px}
+.ctrl label b{color:var(--acc);font-variant-numeric:tabular-nums;font-family:var(--serif);font-size:16px}
 input[type=range]{width:100%;accent-color:var(--acc);height:4px}
-.roiout{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:22px 24px;text-align:center}
-.roiout .v{font-size:42px;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05}
-.roiout .k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-top:8px}
-.roiout .row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);border-top:1px solid var(--line);padding-top:10px;margin-top:16px}
-.roiout .row span:last-child{font-weight:700;font-variant-numeric:tabular-nums}
+.roiout{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:28px 26px;text-align:center}
+.roiout .v{font-family:var(--serif);font-size:48px;font-weight:600;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.02}
+.roiout .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-top:10px}
+.roiout .row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);border-top:1px solid var(--line);padding-top:11px;margin-top:18px}
+.roiout .row span:last-child{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
 /* table */
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.search{flex:1;min-width:160px;padding:9px 13px;border:1px solid var(--line);border-radius:9px;font-size:13px;font-family:inherit;color:var(--ink)}
-.search:focus{outline:none;border-color:var(--acc)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.search{flex:1;min-width:160px;padding:11px 15px;border:1px solid var(--line);border-radius:11px;font-size:13px;font-family:inherit;color:var(--ink);background:var(--bg);transition:border-color .2s,box-shadow .2s}
+.search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-tint)}
 .count{font-size:12px;color:var(--mut);white-space:nowrap}
 .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #eef1f5;white-space:nowrap}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{font-variant-numeric:tabular-nums}
 td.t{color:var(--acc);font-weight:600}
-th{color:var(--mut);font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:.04em;cursor:pointer;user-select:none}
+th{color:var(--mut);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.08em;cursor:pointer;user-select:none}
 th:hover{color:var(--ink)}th.s::after{content:" \25BE";color:var(--acc)}th.s.asc::after{content:" \25B4"}
-tbody tr{transition:background .15s cubic-bezier(.16,1,.3,1)}
-tbody tr:hover{background:#f8fafc}
-.note{color:var(--mut);font-size:12px;margin:14px 0 0;line-height:1.6}
-.filterchip{display:inline-block;background:#fdecea;color:var(--acc);padding:1px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;margin-left:8px;cursor:pointer}
+tbody tr{transition:background .2s cubic-bezier(.16,1,.3,1)}
+tbody tr:hover{background:var(--bg2)}
+.note{color:var(--mut);font-size:12px;margin:16px 0 0;line-height:1.7}
+.filterchip{display:inline-block;background:var(--acc-tint);color:var(--acc-deep);padding:1px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0;text-transform:none;margin-left:8px;cursor:pointer}
 .filterchip::after{content:" ✕";opacity:.6}
-.method li{margin:6px 0}
-footer{color:var(--mut);font-size:12px;margin-top:36px;padding-top:18px;border-top:1px solid var(--line);text-align:center}
+.method li{margin:7px 0}
+footer{color:var(--mut);font-size:12px;margin-top:44px;padding-top:22px;border-top:1px solid var(--line);text-align:center;line-height:1.7}
 @media(prefers-reduced-motion:no-preference){
- .rise{opacity:0;transform:translateY(12px);animation:rise .6s cubic-bezier(.16,1,.3,1) forwards}
- .kpis .kpi:nth-child(1){animation-delay:.10s}.kpis .kpi:nth-child(2){animation-delay:.17s}
- .kpis .kpi:nth-child(3){animation-delay:.24s}.kpis .kpi:nth-child(4){animation-delay:.31s}
- .kpi,.card{transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s cubic-bezier(.16,1,.3,1)}
- .kpi:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px rgba(22,34,61,.20)}
+ .rise{opacity:0;transform:translateY(14px);animation:rise .7s cubic-bezier(.16,1,.3,1) forwards}
+ .kpis .kpi:nth-child(1){animation-delay:.10s}.kpis .kpi:nth-child(2){animation-delay:.18s}
+ .kpis .kpi:nth-child(3){animation-delay:.26s}.kpis .kpi:nth-child(4){animation-delay:.34s}
+ .kpi,.card{transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s cubic-bezier(.16,1,.3,1)}
+ .kpi:hover{transform:translateY(-4px);box-shadow:0 1px 2px rgba(50,38,24,.05),0 22px 44px -20px rgba(50,38,24,.28)}
 }
 @keyframes rise{to{opacity:1;transform:none}}
 @media(max-width:760px){
- .wrap{padding:28px 16px 56px}header h1{font-size:27px}
- .kpis{grid-template-columns:1fr 1fr;gap:10px}
+ .wrap{padding:40px 18px 64px}header h1{font-size:33px;max-width:none}
+ .lead{font-size:21px}.card{padding:24px 20px}
+ .kpis{grid-template-columns:1fr 1fr;gap:12px}
+ .kpi{padding:18px 16px}.kpi .v{font-size:22px;letter-spacing:-.02em}
  .grid2,.roi{grid-template-columns:1fr}
- .sig .big{font-size:44px}
+ .sig{padding:48px 22px}.sig .big{font-size:52px}
 }
 </style></head><body><div class=wrap>
 
@@ -207,29 +230,29 @@ const sigO=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){
 sigO.observe(document.getElementById("sigbig"));
 
 // ---- charts ----
-const AX={axisLine:{lineStyle:{color:"#d4dae3"}},axisLabel:{color:"#7c869c",fontSize:11},
- splitLine:{lineStyle:{color:"#eef1f5"}}};
-const TIP={trigger:"axis",backgroundColor:"#16223d",borderColor:"#16223d",
- textStyle:{color:"#fff",fontSize:12},axisPointer:{lineStyle:{color:"#c7ccd6"}}};
+const AX={axisLine:{lineStyle:{color:"#DDD4C6"}},axisLabel:{color:"#9B9080",fontSize:11},
+ splitLine:{lineStyle:{color:"#EFE8DC"}}};
+const TIP={trigger:"axis",backgroundColor:"#221E1A",borderColor:"#221E1A",
+ textStyle:{color:"#fff",fontSize:12},axisPointer:{lineStyle:{color:"#C9BFB0"}}};
 const charts=[];
 function mk(id,opt){const c=echarts.init(document.getElementById(id));c.setOption(opt);charts.push(c);}
 addEventListener("resize",()=>charts.forEach(c=>c.resize()));
 
 mk("cMonthly",{grid:{left:54,right:16,top:18,bottom:46},tooltip:Object.assign({},TIP,
-  {valueFormatter:gbp}),xAxis:Object.assign({type:"category",data:D.months,axisLabel:{color:"#7c869c",fontSize:10,rotate:38}},AX),
- yAxis:Object.assign({type:"value",axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v/1000)+"k"}},AX),
+  {valueFormatter:gbp}),xAxis:Object.assign({},AX,{type:"category",data:D.months,axisLabel:{color:"#9B9080",fontSize:10,rotate:38}}),
+ yAxis:Object.assign({},AX,{type:"value",axisLabel:{color:"#9B9080",fontSize:11,formatter:v=>"£"+(v/1000)+"k"}}),
  series:[{type:"line",data:D.mrev,smooth:true,symbol:"circle",symbolSize:7,
-  lineStyle:{color:"#16223d",width:2.5},itemStyle:{color:"#16223d"},
-  areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:"rgba(22,34,61,.14)"},{offset:1,color:"rgba(22,34,61,0)"}])}}]});
+  lineStyle:{color:"#221E1A",width:2.5},itemStyle:{color:"#221E1A"},
+  areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:"rgba(34,30,26,.14)"},{offset:1,color:"rgba(34,30,26,0)"}])}}]});
 
 mk("cSeg",{grid:{left:140,right:60,top:10,bottom:30},tooltip:Object.assign({},TIP,{trigger:"item",
   formatter:o=>`${o.name}<br>${gbp(o.value)} · ${D.segs.find(s=>s.name===o.name).cust} customers`}),
- xAxis:Object.assign({type:"value",axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v/1e6)+"M"}},AX),
- yAxis:Object.assign({type:"category",data:D.segs.map(s=>s.name).reverse()},AX),
+ xAxis:Object.assign({},AX,{type:"value",axisLabel:{color:"#9B9080",fontSize:11,formatter:v=>"£"+(v/1e6)+"M"}}),
+ yAxis:Object.assign({},AX,{type:"category",data:D.segs.map(s=>s.name).reverse()}),
  series:[{type:"bar",barWidth:"58%",data:D.segs.map(s=>({value:s.rev,
-   itemStyle:{color:s.name.startsWith("At Risk")?"#e2574c":(s.name==="Champions"?"#d9a441":"#aab2c2"),
+   itemStyle:{color:s.name.startsWith("At Risk")?"#C0532E":(s.name==="Champions"?"#A98140":"#C9BFB0"),
    borderRadius:[0,4,4,0]}})).reverse(),
-  label:{show:true,position:"right",color:"#16223d",fontSize:11,formatter:o=>gbp(o.value)}}]});
+  label:{show:true,position:"right",color:"#221E1A",fontSize:11,formatter:o=>gbp(o.value)}}]});
 
 // ---- cross-filter state ----
 let segFilter=null; // segment name or null
@@ -241,16 +264,16 @@ function setFilter(name){
 }
 chip.onclick=()=>setFilter(segFilter);
 
-const scatterOpt=pts=>({grid:{left:64,right:20,top:16,bottom:48},
+const scatterOpt=pts=>({grid:{left:64,right:20,top:46,bottom:54},
  tooltip:Object.assign({},TIP,{trigger:"item",formatter:o=>`Dormant ${o.value[0]} days<br>Lifetime ${gbp(o.value[1])}`}),
- legend:{data:["Reactivation target","Other customers"],bottom:0,textStyle:{color:"#7c869c",fontSize:12},icon:"circle"},
- xAxis:Object.assign({type:"value",name:"Days since last purchase",nameLocation:"middle",nameGap:30,
-  nameTextStyle:{color:"#7c869c",fontSize:12}},AX),
- yAxis:Object.assign({type:"log",name:"Lifetime revenue (£)",nameLocation:"middle",nameGap:46,
-  nameTextStyle:{color:"#7c869c",fontSize:12},axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>"£"+(v>=1000?(v/1000)+"k":v)}},AX),
+ legend:{data:["Reactivation target","Other customers"],top:0,left:0,itemGap:18,textStyle:{color:"#9B9080",fontSize:12},icon:"circle"},
+ xAxis:Object.assign({},AX,{type:"value",name:"Days since last purchase",nameLocation:"middle",nameGap:30,
+  nameTextStyle:{color:"#9B9080",fontSize:12}}),
+ yAxis:Object.assign({},AX,{type:"log",name:"Lifetime revenue (£)",nameLocation:"middle",nameGap:46,
+  nameTextStyle:{color:"#9B9080",fontSize:12},axisLabel:{color:"#9B9080",fontSize:11,formatter:v=>"£"+(v>=1000?(v/1000)+"k":v)}}),
  series:[
-  {name:"Other customers",type:"scatter",data:pts.filter(p=>p[2]===0).map(p=>[p[0],p[1]]),symbolSize:5,itemStyle:{color:"#aab2c2",opacity:.35}},
-  {name:"Reactivation target",type:"scatter",data:pts.filter(p=>p[2]===1).map(p=>[p[0],p[1]]),symbolSize:6,itemStyle:{color:"#e2574c",opacity:.78}}
+  {name:"Other customers",type:"scatter",data:pts.filter(p=>p[2]===0).map(p=>[p[0],p[1]]),symbolSize:5,itemStyle:{color:"#C9BFB0",opacity:.35}},
+  {name:"Reactivation target",type:"scatter",data:pts.filter(p=>p[2]===1).map(p=>[p[0],p[1]]),symbolSize:6,itemStyle:{color:"#C0532E",opacity:.78}}
  ]});
 const cScatter=echarts.init(document.getElementById("cScatter"));charts.push(cScatter);
 function drawScatter(){
@@ -266,13 +289,13 @@ cSeg.on("click",p=>setFilter(p.name));
 // ---- Pareto curve ----
 mk("cPareto",{grid:{left:54,right:18,top:18,bottom:44},
  tooltip:Object.assign({},TIP,{trigger:"axis",formatter:o=>`Top ${o[0].value[0]}% of customers<br><b>${o[0].value[1]}%</b> of revenue`}),
- xAxis:Object.assign({type:"value",max:100,name:"% of customers (ranked by spend)",nameLocation:"middle",nameGap:28,
-  nameTextStyle:{color:"#7c869c",fontSize:11},axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>v+"%"}},AX),
- yAxis:Object.assign({type:"value",max:100,axisLabel:{color:"#7c869c",fontSize:11,formatter:v=>v+"%"}},AX),
- series:[{type:"line",data:D.pareto,showSymbol:false,lineStyle:{color:"#16223d",width:2.5},
-  areaStyle:{color:"rgba(22,34,61,.08)"},
-  markLine:{symbol:"none",label:{color:"#e2574c",fontSize:11,formatter:"top 20% → 75%"},
-   lineStyle:{color:"#e2574c",type:"dashed"},data:[{xAxis:20}]}}]});
+ xAxis:Object.assign({},AX,{type:"value",max:100,name:"% of customers (ranked by spend)",nameLocation:"middle",nameGap:28,
+  nameTextStyle:{color:"#9B9080",fontSize:11},axisLabel:{color:"#9B9080",fontSize:11,formatter:v=>v+"%"}}),
+ yAxis:Object.assign({},AX,{type:"value",max:100,axisLabel:{color:"#9B9080",fontSize:11,formatter:v=>v+"%"}}),
+ series:[{type:"line",data:D.pareto,showSymbol:false,lineStyle:{color:"#221E1A",width:2.5},
+  areaStyle:{color:"rgba(34,30,26,.08)"},
+  markLine:{symbol:"none",label:{color:"#C0532E",fontSize:11,formatter:"top 20% → 75%"},
+   lineStyle:{color:"#C0532E",type:"dashed"},data:[{xAxis:20}]}}]});
 
 // ---- Cohort retention heatmap ----
 const cohortNames=Object.keys(D.cohorts);
@@ -281,14 +304,14 @@ cohortNames.forEach((c,y)=>D.cohorts[c].ret.forEach((v,x)=>{if(v!=null)heat.push
 mk("cCohort",{grid:{left:74,right:14,top:8,bottom:64},
  tooltip:Object.assign({},TIP,{trigger:"item",
   formatter:o=>`${cohortNames[o.value[1]]} cohort (${D.cohorts[cohortNames[o.value[1]]].n} customers)<br>Month ${o.value[0]}: <b>${o.value[2]}%</b> active`}),
- xAxis:Object.assign({type:"category",data:[...Array(13).keys()],name:"Months since first purchase",
-  nameLocation:"middle",nameGap:26,nameTextStyle:{color:"#7c869c",fontSize:11}},AX),
- yAxis:Object.assign({type:"category",data:cohortNames,axisLabel:{color:"#7c869c",fontSize:10}},AX),
+ xAxis:Object.assign({},AX,{type:"category",data:[...Array(13).keys()],name:"Months since first purchase",
+  nameLocation:"middle",nameGap:26,nameTextStyle:{color:"#9B9080",fontSize:11}}),
+ yAxis:Object.assign({},AX,{type:"category",data:cohortNames,axisLabel:{color:"#9B9080",fontSize:10}}),
  visualMap:{min:0,max:50,calculable:false,orient:"horizontal",left:"center",bottom:0,itemWidth:10,itemHeight:90,
-  textStyle:{color:"#7c869c",fontSize:10},inRange:{color:["#f4f6f9","#f9c8c2","#e2574c","#16223d"]}},
- series:[{type:"heatmap",data:heat,label:{show:true,fontSize:8.5,color:"#33405c",
+  textStyle:{color:"#9B9080",fontSize:10},inRange:{color:["#FAF6EE","#F1D9C8","#C0532E","#221E1A"]}},
+ series:[{type:"heatmap",data:heat,label:{show:true,fontSize:8.5,color:"#4C463E",
   formatter:o=>o.value[0]===0?"":Math.round(o.value[2])},
-  itemStyle:{borderColor:"#fff",borderWidth:1.5,borderRadius:2}}]});
+  itemStyle:{borderColor:"#FFFDFA",borderWidth:1.5,borderRadius:2}}]});
 
 // ---- ROI ----
 const sN=document.getElementById("sN"),sC=document.getElementById("sC");

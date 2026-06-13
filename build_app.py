@@ -14,16 +14,18 @@ seg=pd.read_csv(EXT/"segment_summary.csv")
 rfm=pd.read_csv(EXT/"rfm_customers.csv")
 react=pd.read_csv(OUT/"reactivation_targets.csv")
 
-INK="#16223d"; ACC="#e2574c"; GOLD="#d9a441"; MUT="#7c869c"
+INK="#1B1713"; ACC="#C0532E"; GOLD="#A98140"; MUT="#9B9080"; CREAM="#FBF3E6"
 
-# ---- OG card 1200x630 -------------------------------------------------------
+# ---- OG card 1200x630 (warm editorial) --------------------------------------
 fig=plt.figure(figsize=(12,6.3),dpi=100); fig.patch.set_facecolor(INK)
-ax=fig.add_axes([0,0,1,1]); ax.axis("off")
-ax.text(.06,.78,"CUSTOMER ANALYTICS · RFM SEGMENTATION",color=ACC,fontsize=15,fontweight="bold",family="DejaVu Sans")
-ax.text(.06,.60,"Dormant-Revenue\nReactivation",color="white",fontsize=46,fontweight="bold",va="top",linespacing=1.0)
-ax.text(.06,.26,f"£{m['react_historical_rev']/1e6:.2f}M idle  ·  {m['react_customers']} win-back customers  ·  {m['customers']:,} analysed",
-        color="#cdd6e6",fontsize=18)
-ax.text(.06,.13,"SQL · Python · interactive dashboard",color=MUT,fontsize=14)
+ax=fig.add_axes([0,0,1,1]); ax.axis("off"); ax.set_xlim(0,1); ax.set_ylim(0,1)
+ax.add_patch(plt.Rectangle((0,0),1,1,color="#2C2620",zorder=0))   # warm panel
+ax.add_patch(plt.Rectangle((0,0),.012,1,color=ACC,zorder=1))      # terracotta spine
+ax.text(.07,.78,"CUSTOMER ANALYTICS · RFM SEGMENTATION",color=ACC,fontsize=15,fontweight="bold",family="DejaVu Sans")
+ax.text(.07,.60,"Dormant-Revenue\nReactivation",color=CREAM,fontsize=48,fontweight="bold",va="top",linespacing=1.0,family="DejaVu Serif")
+ax.text(.07,.26,f"£{m['react_historical_rev']/1e6:.2f}M idle   ·   {m['react_customers']} win-back customers   ·   {m['customers']:,} analysed",
+        color="#D8C9B6",fontsize=18)
+ax.text(.07,.13,"SQL · Python · interactive dashboard",color=MUT,fontsize=14)
 fig.savefig(SITE/"og.png",facecolor=INK); plt.close()
 
 # ---- data for JS ------------------------------------------------------------
